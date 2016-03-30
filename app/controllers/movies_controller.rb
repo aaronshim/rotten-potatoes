@@ -7,6 +7,8 @@ class MoviesController < ApplicationController
   end
 
   def index
+    # for checkbox form on ratings
+    @all_ratings = Movie.all_ratings
     # for SQL
     order = params[:asc] ? :asc : :desc
     # for arrows next to the column being sorted
@@ -16,8 +18,12 @@ class MoviesController < ApplicationController
     @last_column = params[:key]
     @next_order = params[:asc] ? nil : true
     # save our settings in the session store
-    if params[:key]
-      session[:settings] = {:key => params[:key], :asc => params[:asc]}
+    if params[:key] || params[:ratings]
+      session[:settings] = {
+        :key => params[:key],
+        :asc => params[:asc],
+        :ratings => params[:ratings]
+      }
     end
     # switches for individual ordering based on our parameters
     if params[:key] == 'title'
