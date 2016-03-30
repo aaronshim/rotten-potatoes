@@ -35,9 +35,8 @@ class MoviesController < ApplicationController
     else
       # if there were saved settings, redirect to that
       if session[:settings]
-        params[:key] = session[:settings][:key]
-        params[:asc] = session[:settings][:asc]
-        index
+        flash.keep
+        redirect_to movies_path(key: session[:settings][:key], asc: session[:settings][:asc])
       else
         @movies = Movie.all
       end
