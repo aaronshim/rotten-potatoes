@@ -18,13 +18,19 @@ class MoviesController < ApplicationController
     @last_column = params[:key]
     @next_order = params[:asc] ? nil : true
     # save our settings in the session store
-    if params[:key] || params[:ratings]
+    if params[:key]
+      params[:ratings] ||= session[:settings][:ratings]
       session[:settings] = {
         :key => params[:key],
         :asc => params[:asc],
-        :ratings => params[:ratings]
       }
     end
+    if params[:ratings]
+      session[:settings] = {} unless session[:settings]
+      session[:settings][:ratings] = params[:ratings]
+    end
+    puts params
+    puts session[:settings]
     # switches for individual ordering based on our parameters
     if params[:key] == 'title'
       @title_glyph = glyph_html
@@ -38,15 +44,23 @@ class MoviesController < ApplicationController
       @release_glyph = glyph_html
       @release_css = 'hilite'
       @movies = Movie.order(release_date: order)
+    # if there were saved settings, redirect to that
     else
-      # if there were saved settings, redirect to that
+      # restructure this catch case of no params elements?
       if session[:settings]
         flash.keep
-        redirect_to movies_path(key: session[:settings][:key], asc: session[:settings][:asc])
-      else
-        @movies = Movie.all
+        if session[:settings][:key]
+          redirect_to movies_path(key: session[:settings][:key], asc: session[:settings][:asc], ratings: session[:settings][:ratings])
+        elsif params[:ratings].nil? && session[:settings][:ratings]
+          redirect_to movies_path(ratings: session[:settings][:ratings])
+        end
       end
+      # no session store catch-all case
+      @movies = Movie.all
     end
+    params[:ratings] ||= session[:settings][:ratings]
+    params[:ratings] ||= Hash[ @all_ratings.map { |x| [x,1] } ]
+    @movies = @movies.where(rating: params[:ratings].keys)
   end
 
   def new
