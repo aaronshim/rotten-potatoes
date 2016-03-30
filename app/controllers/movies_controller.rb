@@ -7,7 +7,29 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    # for SQL
+    order = params[:asc] ? :asc : :desc
+    # for arrows next to the column being sorted
+    glyph = params[:asc] ? "glyphicon glyphicon-triangle-top" : "glyphicon glyphicon-triangle-bottom"
+    glyph_html = "<span class=\"#{glyph}\" aria-hidden=\"true\"></span>"
+    # for switching ascending versus descending on every click
+    @next_order = params[:asc] ? nil : true
+
+    if params[:key] == 'title'
+      @title_glyph = glyph_html
+      @title_css = 'hilite'
+      @movies = Movie.order(title: order)
+    elsif params[:key] == 'rating'
+      @rating_glyph = glyph_html
+      @rating_css = 'hilite'
+      @movies = Movie.order(rating: order)
+    elsif params[:key] == 'release_date'
+      @release_glyph = glyph_html
+      @release_css = 'hilite'
+      @movies = Movie.order(release_date: order)
+    else
+      @movies = Movie.all
+    end
   end
 
   def new
