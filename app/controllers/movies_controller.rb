@@ -13,6 +13,7 @@ class MoviesController < ApplicationController
     glyph = params[:asc] ? "glyphicon glyphicon-triangle-top" : "glyphicon glyphicon-triangle-bottom"
     glyph_html = "<span class=\"#{glyph}\" aria-hidden=\"true\"></span>"
     # for switching ascending versus descending on every click
+    @last_column = params[:key]
     @next_order = params[:asc] ? nil : true
 
     if params[:key] == 'title'
