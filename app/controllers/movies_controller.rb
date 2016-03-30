@@ -15,7 +15,11 @@ class MoviesController < ApplicationController
     # for switching ascending versus descending on every click
     @last_column = params[:key]
     @next_order = params[:asc] ? nil : true
-
+    # save our settings in the session store
+    if params[:key]
+      session[:settings] = {:key => params[:key], :asc => params[:asc]}
+    end
+    # switches for individual ordering based on our parameters
     if params[:key] == 'title'
       @title_glyph = glyph_html
       @title_css = 'hilite'
@@ -29,7 +33,14 @@ class MoviesController < ApplicationController
       @release_css = 'hilite'
       @movies = Movie.order(release_date: order)
     else
-      @movies = Movie.all
+      # if there were saved settings, redirect to that
+      if session[:settings]
+        params[:key] = session[:settings][:key]
+        params[:asc] = session[:settings][:asc]
+        index
+      else
+        @movies = Movie.all
+      end
     end
   end
 
