@@ -6,7 +6,7 @@
   - @all_ratings.each do |rating|
     = rating
     = check_box_tag "ratings[#{rating}]", 1, params[:ratings] && params[:ratings][rating].present?
-  = submit_tag 'Refresh'
+  = submit_tag 'Refresh', class: "btn btn-sm btn-primary"
 %table.table.table-striped#movies
   %thead
     %tr
@@ -22,4 +22,4 @@
         %td= movie.release_date
         %td= link_to "More about #{movie.title}", movie_path(movie)
 
-= link_to 'Add new movie', new_movie_path
+= link_to 'Add new movie', new_movie_path, class: "btn btn-lg btn-success"
