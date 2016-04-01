@@ -58,7 +58,7 @@ class MoviesController < ApplicationController
       # no session store catch-all case
       @movies = Movie.all
     end
-    params[:ratings] ||= session[:settings][:ratings]
+    params[:ratings] ||= session[:settings][:ratings] if session[:settings]
     params[:ratings] ||= Hash[ @all_ratings.map { |x| [x,1] } ]
     @movies = @movies.where(rating: params[:ratings].keys)
   end
