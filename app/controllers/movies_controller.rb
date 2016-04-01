@@ -7,6 +7,7 @@ class MoviesController < ApplicationController
   end
 
   def index
+    #byebug
     # for checkbox form on ratings
     @all_ratings = Movie.all_ratings
     # for SQL
@@ -18,16 +19,16 @@ class MoviesController < ApplicationController
     @last_column = params[:key]
     @next_order = params[:asc] ? nil : true
     # save our settings in the session store
+    session[:settings] = {} unless session[:settings]
     if params[:key]
-      params[:ratings] ||= session[:settings][:ratings]
+      params[:ratings] ||= session[:settings]['ratings']
       session[:settings] = {
         :key => params[:key],
         :asc => params[:asc],
       }
     end
     if params[:ratings]
-      session[:settings] = {} unless session[:settings]
-      session[:settings][:ratings] = params[:ratings]
+      session[:settings]['ratings'] = params[:ratings]
     end
     puts params
     puts session[:settings]
@@ -49,17 +50,24 @@ class MoviesController < ApplicationController
       # restructure this catch case of no params elements?
       if session[:settings]
         flash.keep
-        if session[:settings][:key]
-          redirect_to movies_path(key: session[:settings][:key], asc: session[:settings][:asc], ratings: session[:settings][:ratings])
-        elsif params[:ratings].nil? && session[:settings][:ratings]
-          redirect_to movies_path(ratings: session[:settings][:ratings])
+        if session[:settings]['key']
+          redirect_to movies_path(key: session[:settings]['key'], asc: session[:settings]['asc'], ratings: session[:settings]['ratings'])
+          return
+        elsif params[:ratings].nil? && session[:settings]['ratings']
+          redirect_to movies_path(ratings: session[:settings]['ratings'])
+          return
         end
       end
       # no session store catch-all case
       @movies = Movie.all
     end
-    params[:ratings] ||= session[:settings][:ratings] if session[:settings]
-    params[:ratings] ||= Hash[ @all_ratings.map { |x| [x,1] } ]
+    if session[:settings] && (not params[:ratings])
+      session[:settings]['ratings'] ||= Hash[ @all_ratings.map { |x| [x,1] } ]
+      cached_params = { key: session[:settings]['key'], asc: session[:settings]['asc'], ratings: session[:settings]['ratings'] }
+      redirect_to movies_path(cached_params)
+      return
+    end
+    puts params[:something]
     @movies = @movies.where(rating: params[:ratings].keys)
   end
 
